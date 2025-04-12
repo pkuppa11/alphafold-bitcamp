@@ -72,6 +72,31 @@
       value = value.replace(/[^ARNDCEQGHILKMFPSTWYV]/g, "");
       sequence = value;
     }
+
+  async function predictStructure() {
+    if (!sequence) {
+      alert("Please enter a valid sequence.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sequence }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Unknown error");
+
+      alert(`✅ Structure predicted!\nAccession: ${data.accession}`);
+    } catch (err) {
+      alert(`❌ Prediction failed: ${err.message}`);
+    }
+  }
+
 </script>
 
 <main>
@@ -110,7 +135,7 @@
         />
       </label>
     </div>
-    <button class="button">Predict Structure →</button>
+    <button class="button" on:click={predictStructure}>Predict Structure →</button>
   </div>
 </main>
 
