@@ -1,0 +1,17 @@
+################################################
+# Auto-generated OpenMD input file
+# Created: 2025-04-12 18:05:35
+################################################
+
+component {
+    type = Polymer
+    nMol = 1
+    structure = "P24941.xyz"
+}
+
+forceField = "oplsaa"
+ensemble = NVT
+nSteps = 100000
+dt = 1.0
+
+temperature = 300.0
