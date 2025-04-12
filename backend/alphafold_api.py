@@ -47,15 +47,15 @@ top_hit = lines[1].split('\t')[accession_index]
 print(f"Top matching UniProt accession: {top_hit}")
 
 # 4. Query AlphaFold
-af_url = f"https://alphafold.ebi.ac.uk/api/prediction/{top_hit}"
-af_response = requests.get(af_url)
+# af_url = f"https://alphafold.ebi.ac.uk/api/prediction/{top_hit}"
+# af_response = requests.get(af_url)
 
-if af_response.status_code == 200:
-    pdb_url = af_response.json()[0]["pdbUrl"]
-    pdb_response = requests.get(pdb_url)
-    if pdb_response.status_code == 200:
-        with open(f"pdb_outputs/{top_hit}.pdb", "w") as f:
-            f.write(pdb_response.text)
-    print(f"✅ AlphaFold structure downloaded for {top_hit}")
-else:
-    print(f"❌ No AlphaFold structure found for {top_hit}")
+# if af_response.status_code == 200:
+#     pdb_url = af_response.json()[0]["pdbUrl"]
+#     pdb_response = requests.get(pdb_url)
+#     if pdb_response.status_code == 200:
+#         with open(f"pdb_outputs/{top_hit}.pdb", "w") as f:
+#             f.write(pdb_response.text)
+#     print(f"✅ AlphaFold structure downloaded for {top_hit}")
+# else:
+#     print(f"❌ No AlphaFold structure found for {top_hit}")
