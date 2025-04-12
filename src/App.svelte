@@ -4,4 +4,3 @@
 </script>
 
 <Home />
-<Model />
