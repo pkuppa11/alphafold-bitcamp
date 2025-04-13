@@ -18,6 +18,9 @@
       if (accessions.length !== 4) {
         error = "Please provide exactly 4 accession codes separated by commas.";
       }
+      else {
+        fetchAssistantResponse("Analyze mutation effects between ${accessions[0]} and ${accessions[1]}, ${accessions[2]}, ${accessions[3]}");
+      }
     } catch (e) {
       error = "Failed to parse accession codes from URL.";
     } finally {
@@ -32,6 +35,36 @@
   const next = () => {
     if (currentMutation < 2) currentMutation += 1;
   };
+
+  async function fetchAssistantResponse(message) {
+    try {
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: message }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch assistant response");
+      }
+
+      const result = await response.json();
+
+      // Replace contents of .chat-body
+      const chatBox = document.querySelector(".chat-body");
+      chatBox.innerHTML = `
+        <p><strong>Assistant:</strong> ${result.response}</p>
+      `;
+    } catch (err) {
+      const chatBox = document.querySelector(".chat-body");
+      chatBox.innerHTML = `
+        <p><strong>Assistant:</strong> ❌ ${err.message}</p>
+      `;
+    }
+  }
+
 </script>
 
 <main>
