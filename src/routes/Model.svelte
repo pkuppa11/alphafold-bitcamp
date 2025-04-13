@@ -1,83 +1,111 @@
 <script>
-    export let top_hit; // Passed from your router/navigation
-    
-    let isLoading = true;
-    let embedUrl = `https://alphafold.ebi.ac.uk/entry/${top_hit}`;
-    
-    // Optional: Fetch additional metadata
-    let metadata = null;
-    
-    onMount(async () => {
-      try {
-        // You could fetch additional protein info here if needed
-        // const response = await fetch(`/api/protein-info?accession=${top_hit}`);
-        // metadata = await response.json();
-      } finally {
-        isLoading = false;
-      }
-    });
-  </script>
+  import { page } from '$app/stores';
   
-  <style>
-    .model-container {
-      width: 100%;
-      height: 80vh;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+  let isLoading = true;
+  let error = null;
+  let modelUrl = '';
+
+  $: {
+    const accession = $page.url.searchParams.get('accession');
+    if (!accession) {
+      error = "No protein accession provided";
+    } else {
+      modelUrl = `https://alphafold.ebi.ac.uk/entry/${accession}`;
     }
-    
-    iframe {
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      flex-grow: 1;
-    }
-    
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-    }
-    
-    .error {
-      color: #ef4444;
-      text-align: center;
-    }
-  </style>
+    isLoading = false;
+  }
+</script>
+
+<div class="model-container">
+  {#if isLoading}
+    <div class="loading">Loading structure...</div>
   
-  <div class="model-container">
-    {#if isLoading}
-      <div class="loading">
-        <p>Loading AlphaFold model for {top_hit}...</p>
-      </div>
-    {:else}
-      <div class="header">
-        <h2>AlphaFold Prediction: {top_hit}</h2>
-        <a href={embedUrl} target="_blank" rel="noopener">
-          Open in Full Screen →
-        </a>
-      </div>
-      
+  {:else if error}
+    <div class="error">
+      {error}
+      <a href="/" class="back-link">← Back to Predictor</a>
+    </div>
+  
+  {:else}
+    <div class="header">
+      <h1>AlphaFold Structure: {$page.url.searchParams.get('accession')}</h1>
+      <a href="/" class="back-button">← Back</a>
+    </div>
+    
+    <div class="viewer-container">
       <iframe
-        title={`AlphaFold structure for ${top_hit}`}
-        src={embedUrl}
-        width="100%"
-        height="100%"
+        title="AlphaFold Structure Viewer"
+        src={modelUrl}
         allowfullscreen
       ></iframe>
-      
-      {#if metadata}
-        <div class="metadata">
-          <!-- Display any additional protein info here -->
-        </div>
-      {/if}
-    {/if}
-  </div>
+    </div>
+  {/if}
+</div>
+
+<style>
+  .model-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color: white;
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .header {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+    background: linear-gradient(to right, #38bdf8, #4ade80);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 1.5rem;
+  }
+
+  .viewer-container {
+    flex-grow: 1;
+    position: relative;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .loading, .error {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    gap: 1rem;
+  }
+
+  .error {
+    color: #ff6b6b;
+  }
+
+  .back-button, .back-link {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .back-button:hover, .back-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+</style>

@@ -1,116 +1,99 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+
   let sequence = "";
   let particles = [];
 
+  // Particle animation
   onMount(() => {
-    const aminoAcids = [
-      "A",
-      "R",
-      "N",
-      "D",
-      "C",
-      "E",
-      "Q",
-      "G",
-      "H",
-      "I",
-      "L",
-      "K",
-      "M",
-      "F",
-      "P",
-      "S",
-      "T",
-      "W",
-      "Y",
-      "V",
-    ];
+    const aminoAcids = ["A","R","N","D","C","E","Q","G","H","I","L","K","M","F","P","S","T","W","Y","V"];
     particles = Array.from({ length: 30 }, () => ({
       char: aminoAcids[Math.floor(Math.random() * aminoAcids.length)],
-      x: Math.random() * 100,
-      y: Math.random() * 100,
+      x: Math.random() * 90 + 5,
+      y: Math.random() * 90 + 5,
       size: Math.random() * 0.8 + 0.5,
       speed: Math.random() * 0.3 + 0.1,
       opacity: Math.random() * 0.4 + 0.2,
     }));
+
     const animate = () => {
-      particles = particles.map((p) => ({
-        ...p,
-        y: (p.y + p.speed) % 100,
-      }));
+      particles = particles.map((p) => ({ ...p, y: (p.y + p.speed) % 100 }));
       requestAnimationFrame(animate);
     };
     animate();
   });
+
+  // Handle file upload
   async function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
       const text = await file.text();
-      let content = text
-        .split("\n")
-        .slice(1)
-        .join("")
-        .replace(/\s/g, "")
-        .toUpperCase();
-      content = content.replace(/[^ARNDCEQGHILKMFPSTWYV]/g, "");
-
-      if (content.length === 0) {
-        alert("Error: No valid amino acids found in file!");
-        return;
-      }
-
+      let content = text.split('\n').slice(1).join('').replace(/\s/g, '').toUpperCase();
+      content = content.replace(/[^ARNDCEQGHILKMFPSTWYV]/g, '');
       sequence = content;
     } catch (err) {
       alert("Error reading file!");
     }
   }
+
+  // Handle text input
   function handleInput(e) {
-      let value = e.target.value.toUpperCase();
-      value = value.replace(/[^ARNDCEQGHILKMFPSTWYV]/g, "");
-      sequence = value;
+    let value = e.target.value.toUpperCase();
+    sequence = value.replace(/[^ARNDCEQGHILKMFPSTWYV]/g, "");
+  }
+
+  // Submit to API and navigate
+  async function predictStructure() {
+    if (!sequence) return alert("Please enter a sequence");
+    
+    try {
+      const response = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sequence })
+      });
+      
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Prediction failed");
+      goto(`/model?accession=${data.accession}`);
+    } catch (err) {
+      alert(`Error: ${err.message}`);
     }
+  }
 </script>
 
 <main>
-  {#each particles as particle, i (i)}
-    <div
-      class="particle"
-      style="
-          left: {particle.x}vw;
-          top: {particle.y}vh;
-          font-size: {particle.size}rem;
-          opacity: {particle.opacity};
-        "
-    >
-      {particle.char}
-    </div>
+  {#each particles as particle (particle.id)}
+    <div class="particle" style="
+      left: {particle.x}vw;
+      top: {particle.y}vh;
+      font-size: {particle.size}rem;
+      opacity: {particle.opacity};
+    ">{particle.char}</div>
   {/each}
 
   <div class="content">
     <h1>AlphaFold Predictor</h1>
-    <p class="subtitle">
-      Enter a protein sequence to generate a 3D structure prediction
-    </p>
+    <p class="subtitle">Enter a protein sequence to generate a 3D structure prediction</p>
+    
     <div class="input-container">
       <input
         bind:value={sequence}
         on:input={handleInput}
-        placeholder="Example: ACDEFGHIKLMNPQRSTVWYV"
+        placeholder="Example: ACDEFGHIKLMNPQRSTVWY"
       />
       <label class="upload-button">
         📁 Upload FASTA
-        <input
-          type="file"
-          accept=".fasta,.txt"
-          on:change={(e) => handleFileUpload(e)}
-          hidden
-        />
+        <input type="file" accept=".fasta,.txt" on:change={handleFileUpload} hidden />
       </label>
     </div>
-    <button class="button">Predict Structure →</button>
+    
+    <button class="button" on:click={predictStructure}>
+      Predict Structure →
+    </button>
   </div>
 </main>
 
