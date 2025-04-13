@@ -19,7 +19,7 @@
         error = "Please provide exactly 4 accession codes separated by commas.";
       }
       else {
-        fetchAssistantResponse("Analyze mutation effects between ${accessions[0]} and ${accessions[1]}, ${accessions[2]}, ${accessions[3]}");
+        fetchAssistantResponse(`In 3 sentences, Analyze mutation effects between ${accessions[0]} and ${accessions[1]}, ${accessions[2]}, ${accessions[3]}`);
       }
     } catch (e) {
       error = "Failed to parse accession codes from URL.";

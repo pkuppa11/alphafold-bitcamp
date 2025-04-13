@@ -1,6 +1,6 @@
 from google import genai
 from google.genai import types
-from api_key import key
+from backend.api_key import key
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import requests, time, os
@@ -23,9 +23,9 @@ class UserInput(BaseModel):
 def generate_response(data : UserInput):
     client = genai.Client(api_key=key)
     response = client.models.generate_content(
-        model="gemini-2.0-flash", contents=data,
+        model="gemini-2.0-flash", contents=[{"role": "user", "parts": [{"text": data.data}]}],
         config=types.GenerateContentConfig(
-            max_output_tokens=500,
+            max_output_tokens=100,
             temperature=0.1
         )
     )
