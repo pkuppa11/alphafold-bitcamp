@@ -3,3 +3,4 @@
 
 .DS_Store
 .vercel
+/backend/api_key.py
