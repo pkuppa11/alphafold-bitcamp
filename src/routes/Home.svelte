@@ -94,6 +94,7 @@
 
       window.location.hash = `model?accession=${data.accession}`;
       alert(`✅ Structure predicted!\nAccession: ${data.accession}`);
+      location.reload()
     } catch (err) {
       alert(`❌ Prediction failed: ${err.message}`);
     }
