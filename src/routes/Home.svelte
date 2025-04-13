@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { get_root_for_style, get_store_value } from "svelte/internal";
   let sequence = "";
   let particles = [];
 
@@ -91,6 +92,7 @@
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Unknown error");
 
+      window.location.hash = `model?accession=${data.accession}`;
       alert(`✅ Structure predicted!\nAccession: ${data.accession}`);
     } catch (err) {
       alert(`❌ Prediction failed: ${err.message}`);
