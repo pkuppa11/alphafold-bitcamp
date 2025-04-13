@@ -118,9 +118,9 @@
   {/each}
 
   <div class="content">
-    <h1>AlphaFold Predictor</h1>
+    <h1>AlphaMutate</h1>
     <p class="subtitle">
-      Enter a protein sequence to generate a 3D structure prediction
+      Enter a protein sequence to generate a 3D structure prediction:
     </p>
     <div class="input-container">
       <input
