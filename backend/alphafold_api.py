@@ -54,24 +54,26 @@ def predict_structure(data: SequenceInput):
     lines = tsv_result.strip().split('\n')
     header = lines[0].split('\t')
     accession_index = header.index("Accession")
-    top_hit = lines[1].split('\t')[accession_index]
+    top_hits = [line.split('\t')[accession_index] for line in lines[1:5]]
+    print(top_hits)
 
     # Query AlphaFold
-    af_url = f"https://alphafold.ebi.ac.uk/api/prediction/{top_hit}"
-    af_response = requests.get(af_url)
+    for top_hit in top_hits:
+        af_url = f"https://alphafold.ebi.ac.uk/api/prediction/{top_hit}"
+        af_response = requests.get(af_url)
 
-    if af_response.status_code == 200:
-        pdb_url = af_response.json()[0]["pdbUrl"]
-        pdb_response = requests.get(pdb_url)
-        if pdb_response.status_code == 200:
-            os.makedirs("pdb_outputs", exist_ok=True)
-            pdb_path = f"pdb_outputs/{top_hit}.pdb"
-            with open(pdb_path, "w") as f:
-                f.write(pdb_response.text)
-            return {"message": "Structure downloaded", "accession": top_hit, "pdb_file": pdb_path}
+        if af_response.status_code == 200:
+            pdb_url = af_response.json()[0]["pdbUrl"]
+            pdb_response = requests.get(pdb_url)
+            if pdb_response.status_code == 200:
+                os.makedirs("pdb_outputs", exist_ok=True)
+                pdb_path = f"pdb_outputs/{top_hit}.pdb"
+                with open(pdb_path, "w") as f:
+                    f.write(pdb_response.text)
+                return {"message": "Structure downloaded", "accession": top_hits, "pdb_file": pdb_path}
+            else:
+                raise HTTPException(status_code=500, detail="PDB download failed")
         else:
-            raise HTTPException(status_code=500, detail="PDB download failed")
-    else:
-        raise HTTPException(status_code=404, detail="No AlphaFold structure found")
-    
+            raise HTTPException(status_code=404, detail="No AlphaFold structure found")
+        
     return 1
