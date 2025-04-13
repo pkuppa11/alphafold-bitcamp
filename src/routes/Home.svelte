@@ -146,7 +146,6 @@
   :global(body) {
     margin: 0;
     font-family: "Arial", sans-serif;
-    overflow: hidden;
   }
 
   main {
